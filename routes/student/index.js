@@ -7,6 +7,7 @@ const studentController = require('../../controllers/student/index')
 ROUTE.post('/sign-up', studentController.signUp)
 ROUTE.post('/log-in', studentController.logIn)
 ROUTE.post('/kyc', authorize(constant.ROLES.STUDENT), studentController.saveStudentKyc)
+ROUTE.post('/save-assessment-record', authorize(constant.ROLES.STUDENT), studentController.saveStudentAssessmentRecord)
 
 ROUTE.get('/my-profile', authorize(constant.ROLES.STUDENT), studentController.getMyProfile)
 

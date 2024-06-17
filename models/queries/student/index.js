@@ -1,4 +1,8 @@
-const { studentModel, studentKycModel } = require("../..")
+const {
+    studentModel,
+    studentKycModel,
+    studentAssessmentRecordModel
+} = require("../..")
 
 module.exports = {
 
@@ -65,5 +69,9 @@ module.exports = {
                     isActive: true
                 }
             })
+    },
+
+    async saveStudentAssessmentRecord(data) {
+        return await studentAssessmentRecordModel.create(data)
     }
 }

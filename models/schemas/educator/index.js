@@ -10,7 +10,11 @@ module.exports = (dbConfig, Sequelize) => {
                 primaryKey: true,
                 defaultValue: DataTypes.UUIDV4,
             },
-            name: {
+            fName: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            lName: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
@@ -21,7 +25,7 @@ module.exports = (dbConfig, Sequelize) => {
                     args: true,
                     msg: 'Email address already in use!',
                 },
-                
+
             },
             password: {
                 type: DataTypes.STRING,

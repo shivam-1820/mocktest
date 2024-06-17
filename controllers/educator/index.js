@@ -1,21 +1,29 @@
 const {
     educatorQueries
 } = require('../../models/queries')
+const {
+    generateAccessToken
+} = require('../../utils/jwt')
 const mail = require('../../utils/mail')
 const constant = require('../../helper/constant')
 const bcrypt = require('bcrypt');
-const { generateAccessToken } = require('../../utils/jwt')
 
 
 
 module.exports = {
 
     async signUp(req, res) {
-        let name = req.body.name
+        let fName = req.body.fName
+        let lName = req.body.lName
         let email = req.body.email
         let password = req.body.password
 
-        if (!name || !email || !password) return res.status(422)
+        if (
+            !fName ||
+            !lName ||
+            !email ||
+            !password
+        ) return res.status(422)
             .send({
                 code: 422,
                 status: constant.STATUS.FAILED,
@@ -39,7 +47,8 @@ module.exports = {
                 })
 
             let data = {
-                name: name,
+                fName: fName,
+                lName: lName,
                 email: email,
                 password: bcrypt.hashSync(password, 10),
             }

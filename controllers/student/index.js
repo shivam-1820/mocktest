@@ -15,7 +15,12 @@ module.exports = {
         let password = req.body.password
         let lName = req.body.lName
 
-        if (!fName || !email || !password || !lName) return res.status(422)
+        if (
+            !fName ||
+            !email ||
+            !password ||
+            !lName
+        ) return res.status(422)
             .send({
                 code: 422,
                 status: constant.STATUS.FAILED,
@@ -68,7 +73,10 @@ module.exports = {
         let email = req.body.email
         let password = req.body.password
 
-        if (!email || !password) return res.status(422)
+        if (
+            !email ||
+            !password
+        ) return res.status(422)
             .send({
                 code: 422,
                 status: constant.STATUS.FAILED,
@@ -226,7 +234,10 @@ module.exports = {
         let oldPassword = req.body.oldPassword
         let newPassword = req.body.newPassword
 
-        if (!oldPassword || !newPassword) return res.status(422)
+        if (
+            !oldPassword ||
+            !newPassword
+        ) return res.status(422)
             .send({
                 code: 422,
                 status: constant.STATUS.FAILED,
@@ -259,6 +270,60 @@ module.exports = {
                     code: 200,
                     status: constant.STATUS.SUCCESS,
                     msg: constant.SUCCESS_MESSAGES.PASSWORD_UPDATE
+                })
+
+        } catch (error) {
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async saveStudentAssessmentRecord(req, res) {
+        let studentId = req.auth.id
+        let courseId = req.body.courseId
+        let academicPaperId = req.body.academicPaperId
+        let subjectId = req.body.subjectId
+        let chapterId = req.body.chapterId
+        let questionId = req.body.questionId
+        let selectedAnswerId = req.body.selectedAnswerId
+        let answerMarkedAs = req.body.answerMarkedAs
+
+        if (
+            !courseId ||
+            !questionId ||
+            !selectedAnswerId ||
+            !answerMarkedAs
+        ) return res.status(422)
+            .send({
+                code: 422,
+                status: constant.STATUS.FAILED,
+                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
+            })
+
+        try {
+
+            let data = {
+                studentId,
+                courseId,
+                academicPaperId,
+                subjectId,
+                chapterId,
+                questionId,
+                selectedAnswerId,
+                answerMarkedAs
+            }
+
+            let assessmentRecord = await studentQueries.saveStudentAssessmentRecord(data)
+            return res.status(200)
+                .send({
+                    code: 200,
+                    status: constant.STATUS.SUCCESS,
+                    msg: constant.SUCCESS_MESSAGES.SAVE_DATA,
+                    data: assessmentRecord
                 })
 
         } catch (error) {

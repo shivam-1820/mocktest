@@ -42,6 +42,12 @@ module.exports = {
         FAILED: 'failed'
     },
 
+    ANSWERSTATUS: {
+        CORRECT: 'green',
+        WRONG: 'red',
+        SKIPPED: 'grey'
+    },
+
     QUALIFICATION: {
         TENTH: '10th',
         TWELFTH: '12th',
@@ -59,7 +65,7 @@ module.exports = {
         NOT_USER: 'User not found',
         INVALID_EMAIL: 'Invalid email',
         SHORT_PASSWORD: 'Password is too short',
-        WRONG_URL: 'Make sure url is correct!!!',
+        WRONG_URL: 'Make sure url is correct!!',
         DATABASE_NOT_CONNECTED: 'Could not connect to the database. Exiting now...'
     },
 
@@ -69,6 +75,7 @@ module.exports = {
         NEW_PROFILE: 'Profile created successfully',
         PROFILE_UPDATED: 'Profile updated successfully',
         PASSWORD_UPDATE: 'Password updated successfully',
-        DATABASE_CONNECTED: 'Connected to Database!'
+        DATABASE_CONNECTED: 'Connected to Database!!',
+        SAVE_DATA: 'Data save successfully'
     }
 }
