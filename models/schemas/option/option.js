@@ -29,11 +29,15 @@ module.exports = (dbConfig, Sequelize) => {
             },
             image: {
                 type: DataTypes.STRING,
-                allowNull: true
+                defaultValue: ''
             },
             isImportant: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
+            },
+            isCorrect: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
             },
             optionStatus: {
                 type: DataTypes.BOOLEAN,

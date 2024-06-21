@@ -16,7 +16,7 @@ module.exports = (dbConfig, Sequelize) => {
             },
             titleHi: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: true
             },
             descriptionEn: {
                 type: DataTypes.STRING,

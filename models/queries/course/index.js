@@ -1,6 +1,12 @@
-const { courseModel, courseExamAssociationModel, examModel } = require('../../index')
+const {
+    courseModel,
+    courseExamAssociationModel,
+    examModel
+} = require('../../index')
 const constant = require('../../../helper/constant')
-const { Op } = require('sequelize');
+const {
+    Op
+} = require('sequelize');
 
 module.exports = {
 
@@ -38,6 +44,18 @@ module.exports = {
             })
             return examDetails
 
+        })
+    },
+
+    async getAllExam(language) {
+        let examAttributes = ['examId', 'image']
+        if (language == constant.LANGUAGE.ENGLISH) examAttributes.push(['nameEn', 'name'], ['descriptionEn', 'description'])
+        else examAttributes.push(['nameHi', 'name'], ['descriptionHi', 'description'])
+        return await examModel.findAll({
+            attributes: examAttributes,
+            where: {
+                examStatus: true
+            }
         })
     }
 

@@ -1,10 +1,10 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (dbConfig, Sequelize) => {
-    const questionOptionAssociationSchema = dbConfig.define('questionOptionAssociation',
+    const educatorTestSeriesQuestionAssociationSchema = dbConfig.define('educatorTestSeriesQuestionAssociation',
         {
 
-            questionOptionAssociationId: {
+            testSeriesQuestionAssociationId: {
                 type: Sequelize.UUID,
                 primaryKey: true,
                 defaultValue: DataTypes.UUIDV4
@@ -13,12 +13,12 @@ module.exports = (dbConfig, Sequelize) => {
                 type: Sequelize.UUID,
                 allowNull: false,
             },
-            optionId: {
+            testSeriesId: {
                 type: Sequelize.UUID,
                 allowNull: false,
             },
-            isCorrect: {
-                type: DataTypes.BOOLEAN,
+            subjectId: {
+                type: Sequelize.UUID,
                 allowNull: false,
             },
             associationStatus: {
@@ -31,5 +31,5 @@ module.exports = (dbConfig, Sequelize) => {
             updatedAt: false,
         }
     );
-    return questionOptionAssociationSchema
+    return educatorTestSeriesQuestionAssociationSchema
 }

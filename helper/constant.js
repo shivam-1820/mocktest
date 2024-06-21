@@ -18,10 +18,9 @@ module.exports = {
     },
 
     OPTION_TYPE: {
-        MULTIPLE_CHOICE: 'multiple_choice',
-        TRUE_OR_FALSE: 'true_false',
-        SHORT_ANSWER: 'short_answer'
-
+        MULTIPLE_CHOICE: 'mcqs',
+        TRUE_OR_FALSE: 'tfq',
+        SHORT_ANSWER: 'saq'
     },
 
     CONTANT_TYPE: {
@@ -39,7 +38,9 @@ module.exports = {
 
     STATUS: {
         SUCCESS: 'success',
-        FAILED: 'failed'
+        FAILED: 'failed',
+        TRUE: 'true',
+        FALSE: 'false'
     },
 
     ANSWERSTATUS: {
@@ -56,6 +57,10 @@ module.exports = {
         PHD: 'phd'
     },
 
+    DEFAULT: {
+        USER_IMAGE: 'https://rgyan-flutter200503-dev.s3.ap-south-1.amazonaws.com/web/pg/mobileMenuIcons/profile.png'
+    },
+
     ERROR_MESSAGES: {
         DUBLICATE_EMAIL: 'Email address already in use!',
         DUBLICATE_PHONE_NUMBER: 'Mobile number already in use!',
@@ -66,7 +71,8 @@ module.exports = {
         INVALID_EMAIL: 'Invalid email',
         SHORT_PASSWORD: 'Password is too short',
         WRONG_URL: 'Make sure url is correct!!',
-        DATABASE_NOT_CONNECTED: 'Could not connect to the database. Exiting now...'
+        DATABASE_NOT_CONNECTED: 'Could not connect to the database. Error:',
+        INVALID_OPTION: 'Option is not related to this question'
     },
 
     SUCCESS_MESSAGES: {
@@ -75,7 +81,7 @@ module.exports = {
         NEW_PROFILE: 'Profile created successfully',
         PROFILE_UPDATED: 'Profile updated successfully',
         PASSWORD_UPDATE: 'Password updated successfully',
-        DATABASE_CONNECTED: 'Connected to Database!!',
+        DATABASE_CONNECTED: 'Database connected successfully',
         SAVE_DATA: 'Data save successfully'
     }
 }

@@ -1,20 +1,19 @@
 const { DataTypes } = require('sequelize');
-const constants = require('../../../helper/constant')
 
 module.exports = (dbConfig, Sequelize) => {
-    const answerSchema = dbConfig.define('answer',
+    const educatorTestSeriesSchema = dbConfig.define('educatorTestSeries',
         {
 
-            answerId: {
+            testSeriesId: {
                 type: Sequelize.UUID,
                 primaryKey: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            textEn: {
+            titleEn: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            textHi: {
+            titleHi: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
@@ -26,32 +25,23 @@ module.exports = (dbConfig, Sequelize) => {
                 type: DataTypes.STRING,
                 allowNull: true
             },
-            type: {
-                type: DataTypes.ENUM(
-                    constants.CONTANT_TYPE.IMAGE,
-                    constants.CONTANT_TYPE.TEXT,
-                    constants.CONTANT_TYPE.BOTH
-                ),
+            educatorId: {
+                type: Sequelize.UUID,
                 allowNull: false
-
             },
-            image: {
-                type: DataTypes.STRING,
-                allowNull: true
+            examId: {
+                type: Sequelize.UUID,
+                allowNull: false
             },
-            isImportant: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false,
-            },
-            answerStatus: {
+            testSeriesStatus: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
             },
         },
         {
-            createdAt: false,
+            createdAt: true,
             updatedAt: false,
         }
     );
-    return answerSchema
+    return educatorTestSeriesSchema
 }

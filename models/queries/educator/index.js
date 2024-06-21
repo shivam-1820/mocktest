@@ -1,6 +1,8 @@
-const { educatorModel } = require('../..')
-const educator = require('../../schemas/educator')
-const { updateNewPassword } = require('../student')
+const {
+    educatorModel,
+    educatorTestSeriesModel,
+    educatorTestSeriesQuestionAssociationModel
+} = require('../..')
 
 
 module.exports = {
@@ -46,6 +48,22 @@ module.exports = {
                     isActive: true
                 }
             }
+        )
+    },
+
+    async createNewTestSeries(data, transaction) {
+        return await educatorTestSeriesModel.create(
+            data, transaction
+        )
+    },
+
+    async testSeriesQuestionRelation(questionId, testSeriesId, subjectId, transaction) {
+        return await educatorTestSeriesQuestionAssociationModel.create({
+            questionId: questionId,
+            testSeriesId: testSeriesId,
+            subjectId: subjectId
+        },
+            transaction
         )
     }
 }

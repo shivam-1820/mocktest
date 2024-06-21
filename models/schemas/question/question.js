@@ -38,7 +38,7 @@ module.exports = (dbConfig, Sequelize) => {
             },
             image: {
                 type: DataTypes.STRING,
-                allowNull: true
+                defaultValue: ''
             },
             isImportant: {
                 type: DataTypes.BOOLEAN,

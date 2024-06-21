@@ -125,7 +125,7 @@ module.exports = {
 
     async saveStudentKyc(req, res) {
         let studentId = req.auth.id
-        let avtar = req.body.avtar
+        let avatar = req.body.avatar
         let dob = req.body.dob
         let gender = req.body.gender
         let number = req.body.number
@@ -154,7 +154,7 @@ module.exports = {
 
             let kycData = {
                 studentId,
-                avtar,
+                avatar,
                 dob,
                 gender,
                 number,

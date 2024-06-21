@@ -13,9 +13,9 @@ module.exports = (dbConfig, Sequelize) => {
                 type: Sequelize.UUID,
                 allowNull: false,
             },
-            avtar: {
+            avatar: {
                 type: DataTypes.STRING,
-                defaultValue: ''
+                defaultValue: constants.DEFAULT.USER_IMAGE
             },
             dob: {
                 type: DataTypes.STRING,

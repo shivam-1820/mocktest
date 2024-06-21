@@ -33,8 +33,10 @@ module.exports = {
     async examsByStreamId(req, res) {
         let language = req.query.language || constant.LANGUAGE.ENGLISH
         let streamId = req.query.streamId
+        let allStream = req.query.allStream
+        let examCourses
 
-        if (!streamId) return res.status(422)
+        if (!streamId && !allStream) return res.status(422)
             .send({
                 code: 422,
                 status: constant.STATUS.FAILED,
@@ -43,7 +45,8 @@ module.exports = {
 
         try {
 
-            let examCourses = await courseQueries.examByStreamId(streamId, language)
+            if (streamId) examCourses = await courseQueries.examByStreamId(streamId, language)
+            else examCourses = await courseQueries.getAllExam(language)
             return res.status(200)
                 .send({
                     code: 200,

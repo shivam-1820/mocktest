@@ -4,7 +4,6 @@ const {
     chapterQuestionAssociationModel
 } = require('../../index')
 const constant = require('../../../helper/constant')
-const { Op } = require('sequelize');
 
 
 module.exports = {
@@ -33,12 +32,23 @@ module.exports = {
         let attributes = ['questionId', 'questionType', 'optionType', 'image']
         if (language == constant.LANGUAGE.ENGLISH) attributes.push(['textEn', 'text'])
         else attributes.push(['textHi', 'text'])
-        return await questionModel.findAll({
+        return await questionModel.findOne({
             attributes: attributes,
             where: {
                 questionId: questionId,
                 questionStatus: true
             }
+        })
+    },
+
+    async createNewQuestions(data, transaction) {
+        return await questionModel.create({
+            textEn: data.text,
+            questionType: data.questionType,
+            optionType: data.optionType,
+            textHi: ''
+        }, {
+            transaction
         })
     }
 }
