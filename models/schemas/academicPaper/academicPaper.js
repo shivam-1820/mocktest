@@ -19,11 +19,11 @@ module.exports = (dbConfig, Sequelize) => {
                 allowNull: true
             },
             descriptionEn: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             descriptionHi: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             paperType: {
@@ -54,6 +54,14 @@ module.exports = (dbConfig, Sequelize) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
             },
+            isFree: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true,
+            },
+            price: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            }
         },
         {
             createdAt: true,

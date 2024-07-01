@@ -57,6 +57,12 @@ module.exports = {
         PHD: 'phd'
     },
 
+    ENROLLMENT_TYPE: {
+        FREE: 'free',
+        PURCHASED: 'purchased',
+        TRIAL: 'trial'
+    },
+
     DEFAULT: {
         USER_IMAGE: 'https://rgyan-flutter200503-dev.s3.ap-south-1.amazonaws.com/web/pg/mobileMenuIcons/profile.png'
     },
@@ -72,7 +78,10 @@ module.exports = {
         SHORT_PASSWORD: 'Password is too short',
         WRONG_URL: 'Make sure url is correct!!',
         DATABASE_NOT_CONNECTED: 'Could not connect to the database. Error:',
-        INVALID_OPTION: 'Option is not related to this question'
+        INVALID_OPTION: 'Option is not related to this question',
+        DUBLICATE_USER: 'User already exists',
+        DUBLICATE_TRIAL: 'You already used trail',
+        DUBLICATE_TEST: 'You already have this test'
     },
 
     SUCCESS_MESSAGES: {

@@ -1,10 +1,14 @@
-const { expressjwt: jwt } = require('express-jwt');
-const secretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
-const constant = require('../helper/constant')
+const {
+    expressjwt: jwt
+} = require('express-jwt');
 const {
     studentQueries,
-    educatorQueries
+    educatorQueries,
+    adminQueries
 } = require('../models/queries/index')
+const secretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
+const constant = require('../helper/constant')
+
 
 
 module.exports = authorize;
@@ -17,10 +21,16 @@ function authorize(roles = []) {
     }
 
     return [
-        jwt({ secret: secretKey, algorithms: ['HS256'] }),
+        jwt({
+            secret: secretKey,
+            algorithms: ['HS256']
+        }),
 
         (req, res, next) => {
-            if (roles.length && !roles.includes(req.auth.role)) {
+            if (
+                roles.length &&
+                !roles.includes(req.auth.role
+                )) {
                 return res.status(401)
                     .send({
                         code: 401,
@@ -54,7 +64,6 @@ function authorize(roles = []) {
                             }
                         )
                     break
-
                 case constant.ROLES.EDUCATOR:
                     educatorQueries.educatorById(req.auth.id)
                         .then(
@@ -80,7 +89,31 @@ function authorize(roles = []) {
                             }
                         )
                     break
-
+                case constant.ROLES.ADMIN:
+                    adminQueries.adminById(req.auth.id)
+                        .then(
+                            user => {
+                                if (user) {
+                                    if (!user.isActive) return res.status(422)
+                                        .send({
+                                            code: 403,
+                                            status: 'failed',
+                                            msg: 'Unactive account'
+                                        })
+                                    req.user = JSON.parse(JSON.stringify(user))
+                                    req.userType = constant.ROLES.ADMIN
+                                    next()
+                                } else {
+                                    return res.status(404)
+                                        .send({
+                                            code: 404,
+                                            status: 'failed',
+                                            msg: 'User not found'
+                                        })
+                                }
+                            }
+                        )
+                    break
                 default:
                     return res.status(401)
                         .send({

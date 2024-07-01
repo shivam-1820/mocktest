@@ -1,8 +1,10 @@
 const {
     studentModel,
     studentKycModel,
-    studentAssessmentRecordModel
+    studentAssessmentRecordModel,
+    studentEnrollmentModel
 } = require("../..")
+const constant = require("../../../helper/constant")
 
 module.exports = {
 
@@ -16,17 +18,22 @@ module.exports = {
 
     },
 
-    async newStudent(data) {
-        return await studentModel.create(data)
+    async newStudent(data, transaction) {
+        return await studentModel.create(data,
+            {
+                transaction
+            })
     },
 
-    async saveStudent(data, studentId) {
+    async saveStudent(data, studentId, transaction) {
         return await studentModel.update(data,
             {
                 where: {
                     studentId: studentId
                 }
-            }
+            }, {
+            transaction
+        }
         )
     },
 
@@ -47,16 +54,20 @@ module.exports = {
         })
     },
 
-    async updateStudentKyc(data, studentId) {
+    async updateStudentKyc(data, studentId, transaction) {
         return await studentKycModel.update(data, {
             where: {
                 studentId: studentId
             }
+        }, {
+            transaction
         })
     },
 
     async createStudentKyc(data) {
-        return await studentKycModel.create(data)
+        return await studentKycModel.create(data, {
+            transaction
+        })
     },
 
     async updateNewPassword(newPassword, studentId) {
@@ -71,7 +82,24 @@ module.exports = {
             })
     },
 
-    async saveStudentAssessmentRecord(data) {
-        return await studentAssessmentRecordModel.create(data)
+    async saveStudentAssessmentRecord(data, transaction) {
+        return await studentAssessmentRecordModel.create(data, {
+            transaction
+        })
+    },
+
+    async enrollmentInfoByStudentId(studentId) {
+        return await studentEnrollmentModel.findOne({
+            where: {
+                studentId: studentId,
+                status: true
+            }
+        })
+    },
+
+    async saveEnrollmentData(data, transaction) {
+        return await studentEnrollmentModel.create(data, {
+            transaction
+        })
     }
 }

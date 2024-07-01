@@ -117,6 +117,7 @@ module.exports = {
                 })
 
         } catch (error) {
+            console.log(error)
             return res.status(422)
                 .send({
                     code: 422,

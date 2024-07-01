@@ -4,15 +4,40 @@ const authorize = require('../../utils/auth_middleware')
 const constant = require('../../helper/constant')
 const educatorController = require('../../controllers/educator/index')
 
+ROUTE.post(
+    '/sign-up',
+    educatorController.signUp
+)
+ROUTE.post(
+    '/log-in',
+    educatorController.logIn
+)
+ROUTE.post(
+    '/kyc',
+    authorize(constant.ROLES.EDUCATOR),
+    educatorController.saveEducatorKyc
+)
 
+ROUTE.get(
+    '/educator-test-series',
+    authorize(constant.ROLES.EDUCATOR),
+    educatorController.academicPaperByEducatorId
+)
+ROUTE.get(
+    '/my-profile',
+    authorize(constant.ROLES.EDUCATOR),
+    educatorController.getMyProfile
+)
+ROUTE.get(
+    '/all-educator',
+    educatorController.getAllEducator
+)
 
-ROUTE.post('/sign-up', educatorController.signUp)
-ROUTE.post('/log-in', educatorController.logIn)
-ROUTE.post('/add-new-test-series', authorize(constant.ROLES.EDUCATOR), educatorController.addNewAcademicTest)
-
-ROUTE.get('/educator-test-series', authorize(constant.ROLES.EDUCATOR), educatorController.academicPaperByEducatorId)
-
-ROUTE.put('/update-password', authorize(constant.ROLES.EDUCATOR), educatorController.updateNewPassword)
+ROUTE.put(
+    '/update-password',
+    authorize(constant.ROLES.EDUCATOR),
+    educatorController.updateNewPassword
+)
 
 
 

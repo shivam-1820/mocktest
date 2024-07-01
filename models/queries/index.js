@@ -7,5 +7,6 @@ module.exports = {
     questionQueries: require('./question/index'),
     optionQueries: require('./option/index'),
     subjectQueries: require('./subject/index'),
-    chapterQueries: require('./chapter/index')
+    chapterQueries: require('./chapter/index'),
+    adminQueries: require('./admin/index')
 }

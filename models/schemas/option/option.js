@@ -11,12 +11,12 @@ module.exports = (dbConfig, Sequelize) => {
                 defaultValue: DataTypes.UUIDV4
             },
             textEn: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: false
             },
             textHi: {
-                type: DataTypes.STRING,
-                allowNull: false
+                type: DataTypes.TEXT,
+                allowNull: true
             },
             type: {
                 type: DataTypes.ENUM(
@@ -34,10 +34,6 @@ module.exports = (dbConfig, Sequelize) => {
             isImportant: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
-            },
-            isCorrect: {
-                type: DataTypes.BOOLEAN,
-                allowNull: false,
             },
             optionStatus: {
                 type: DataTypes.BOOLEAN,

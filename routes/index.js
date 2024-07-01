@@ -6,6 +6,7 @@ const courseRoutes = require('./course/index')
 const academicPaperRoutes = require('./academicPaper/index')
 const questionRoutes = require('./question/index')
 const answerRoutes = require('./answer/index')
+const adminRoutes = require('./admin/index')
 
 
 
@@ -16,6 +17,7 @@ ROUTE.use('/course', courseRoutes)
 ROUTE.use('/academic-paper', academicPaperRoutes)
 ROUTE.use('/question', questionRoutes)
 ROUTE.use('/answer', answerRoutes)
+ROUTE.use('/admin', adminRoutes)
 
 
 

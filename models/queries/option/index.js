@@ -62,7 +62,7 @@ module.exports = {
         return await questionOptionAssociationModel.findOne({
             where: {
                 optionId: optionId,
-                optionStatus: true,
+                associationStatus: true,
                 isCorrect: true
             }
         })

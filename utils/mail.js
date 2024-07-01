@@ -24,6 +24,6 @@ module.exports = {
             return false;
         }
 
-        return email;
+        return true;
     }
 }

@@ -11,7 +11,9 @@ const optionModel = require('./schemas/option/option')
 const examModel = require('./schemas/exam/exam')
 const studentAssessmentRecordModel = require('./schemas/student/assessmentRecord')
 const academicPaperModel = require('./schemas/academicPaper/academicPaper')
-const educatorTestSeriesModel = require('./schemas/educator/testSeries')
+const educatorKycModel = require('./schemas/educator/educatorKyc')
+const studentEnrollmentModel = require('./schemas/student/studentEnrollment')
+
 const examSubjectAssociationModel = require('./schemas/association/examSubjectAssociation')
 const subjectChapterAssociationModel = require('./schemas/association/subjectChapterAssociation')
 const chapterQuestionAssociationModel = require('./schemas/association/chapterQuestionAssociation')
@@ -20,7 +22,6 @@ const courseExamAssociationModel = require('./schemas/association/courseExamAsso
 const examAcademicPaperAssociationModel = require('./schemas/association/examAcademicPaperAssociation')
 const questionAcademicPaperAssociationModel = require('./schemas/association/questionAcademicPaperAssociation')
 const subjectAcademicPaperAssociationModel = require('./schemas/association/subjectAcademicPaperAssociation')
-const educatorTestSeriesQuestionAssociationModel = require('./schemas/association/educatorTestSeriesQuestionAssociation')
 
 
 
@@ -55,7 +56,9 @@ exports.questionModel = questionModel(exports.dbConfig, Sequelize)
 exports.optionModel = optionModel(exports.dbConfig, Sequelize)
 exports.examModel = examModel(exports.dbConfig, Sequelize)
 exports.academicPaperModel = academicPaperModel(exports.dbConfig, Sequelize)
-exports.educatorTestSeriesModel = educatorTestSeriesModel(exports.dbConfig, Sequelize)
+exports.educatorKycModel = educatorKycModel(exports.dbConfig, Sequelize)
+exports.studentEnrollmentModel = studentEnrollmentModel(exports.dbConfig, Sequelize)
+
 exports.studentAssessmentRecordModel = studentAssessmentRecordModel(exports.dbConfig, Sequelize)
 exports.examSubjectAssociationModel = examSubjectAssociationModel(exports.dbConfig, Sequelize)
 exports.subjectChapterAssociationModel = subjectChapterAssociationModel(exports.dbConfig, Sequelize)
@@ -65,4 +68,3 @@ exports.courseExamAssociationModel = courseExamAssociationModel(exports.dbConfig
 exports.examAcademicPaperAssociationModel = examAcademicPaperAssociationModel(exports.dbConfig, Sequelize)
 exports.questionAcademicPaperAssociationModel = questionAcademicPaperAssociationModel(exports.dbConfig, Sequelize)
 exports.subjectAcademicPaperAssociationModel = subjectAcademicPaperAssociationModel(exports.dbConfig, Sequelize)
-exports.educatorTestSeriesQuestionAssociationModel = educatorTestSeriesQuestionAssociationModel(exports.dbConfig, Sequelize)

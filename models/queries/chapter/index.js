@@ -2,8 +2,10 @@ const {
     subjectChapterAssociationModel,
     chapterModel,
 } = require('../../index')
+const { 
+    Op 
+} = require('sequelize');
 const constant = require('../../../helper/constant')
-const { Op } = require('sequelize');
 
 module.exports = {
 
@@ -18,14 +20,14 @@ module.exports = {
                 subjectId: subjectId,
                 associationStatus: true
             }
-        }).then(async (subject) => {
-            subject = JSON.parse(JSON.stringify(subject))
+        }).then(async (chapterIds) => {
+            chapterIds = JSON.parse(JSON.stringify(chapterIds))
 
             return await chapterModel.findAll({
                 attributes: chapterAttribute,
                 where: {
                     chapterId: {
-                        [Op.in]: (() => subject.map(chapter => chapter.chapterId))()
+                        [Op.in]: (() => chapterIds.map(chapter => chapter.chapterId))()
                     },
                     chapterStatus: true
                 }

@@ -15,14 +15,14 @@ module.exports = (dbConfig, Sequelize) => {
             },
             nameHi: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: true
             },
             descriptionEn: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             descriptionHi: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             isImportant: {

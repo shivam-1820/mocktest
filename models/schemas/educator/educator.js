@@ -39,6 +39,10 @@ module.exports = (dbConfig, Sequelize) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
             },
+            isAdmin: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
         },
         {
             createdAt: 'hireDate',

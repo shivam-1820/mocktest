@@ -1,7 +1,5 @@
 const {
     educatorQueries,
-    questionQueries,
-    optionQueries,
     academicPaperQueries
 } = require('../../models/queries')
 const {
@@ -14,11 +12,10 @@ const mail = require('../../utils/mail')
 const constant = require('../../helper/constant')
 const bcrypt = require('bcrypt');
 
-
-
 module.exports = {
 
     async signUp(req, res) {
+        const transaction = await dbConfig.transaction()
         let fName = req.body.fName
         let lName = req.body.lName
         let email = req.body.email
@@ -44,14 +41,22 @@ module.exports = {
 
         try {
 
-            email = await mail.isEmailValid(email)
+            let checkEmail = await mail.isEmailValid(email)
             if (
-                !email
+                !checkEmail
             ) return res.status(422)
                 .send({
                     code: 422,
                     status: constant.STATUS.FAILED,
                     msg: constant.ERROR_MESSAGES.INVALID_EMAIL
+                })
+
+            let educatorExists = await educatorQueries.educatorExists(email)
+            if (educatorExists) return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: constant.ERROR_MESSAGES.DUBLICATE_USER
                 })
 
             let data = {
@@ -61,8 +66,8 @@ module.exports = {
                 password: bcrypt.hashSync(password, 10),
             }
 
-            let newEducator = await educatorQueries.newEducator(data)
-
+            let newEducator = await educatorQueries.newEducator(data, transaction)
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 201,
@@ -70,7 +75,9 @@ module.exports = {
                     data: newEducator,
                     msg: constant.SUCCESS_MESSAGES.NEW_PROFILE
                 })
+
         } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
@@ -82,6 +89,7 @@ module.exports = {
     },
 
     async logIn(req, res) {
+        const transaction = await dbConfig.transaction()
         let email = req.body.email
         let password = req.body.password
 
@@ -119,8 +127,8 @@ module.exports = {
                 })
 
             let accessToken = await generateAccessToken(educatorExists.educatorId, constant.ROLES.EDUCATOR);
-            let lastLogin = await educatorQueries.saveEducatorDetails({ lastLogin: new Date() }, educatorExists.educatorId);
-
+            let lastLogin = await educatorQueries.saveEducatorDetails({ lastLogin: new Date() }, educatorExists.educatorId, transaction);
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 200,
@@ -130,6 +138,7 @@ module.exports = {
                 })
 
         } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
@@ -196,166 +205,6 @@ module.exports = {
         }
     },
 
-    async addNewAcademicTest(req, res) {
-        // let educatorId = '3f175905-bcbf-41e5-9b94-cc8b93608ffa'
-        // let title = 'testing'
-        // let questionDetails = [
-        //     {
-        //         "question": {
-        //             "questionType": "text",
-        //             "optionType": "multiple_choice",
-        //             "image": null,
-        //             "text": "<h3>The maximum vertical height to which a man can throw a ball is 136m. The maximum horizontal\ndistance upto which he can throw the same ball is : \n</h3>"
-        //         }
-        //         ,
-        //         "subjectId": "2320d114-1cff-4d1e-acde-6fc7407caf98",
-        //         "options": [
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>136 m</p>",
-        //                 "isCorrect": "1"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>272 m</p>",
-        //                 "isCorrect": "0"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>192 m</p>",
-        //                 "isCorrect": "0"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>68 m</p>",
-        //                 "isCorrect": "0"
-        //             }
-        //         ]
-        //     },
-        //     {
-        //         "question": {
-        //             "questionType": "both",
-        //             "optionType": "multiple_choice",
-        //             "image": "C:\\Users\\ashad\\OneDrive\\Pictures\\Screenshots\\Screenshot 2024-05-30 153644.png",
-        //             "text": "<h3>As per given figure, a weightless pulley P is attached on a double inclined frictional surfaces. The tension in the string (massless) will be (if g = 10 m/s<sup>2</sup>)</h3>"
-        //         }
-        //         ,
-        //         "subjectId": "2320d114-1cff-4d1e-acde-6fc7407caf98",
-        //         "options": [
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>4(√3+1)N</p>",
-        //                 "isCorrect": "1"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>(4√3+1)N</p>",
-        //                 "isCorrect": "0"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>(4√3-1)N</p>",
-        //                 "isCorrect": "0"
-        //             },
-        //             {
-        //                 "type": "text",
-        //                 "image": null,
-        //                 "text": "<p>4(√3-1)N</p>",
-        //                 "isCorrect": "0"
-        //             }
-        //         ]
-        //     },
-        // ]
-
-        const transaction = await dbConfig.transaction()
-        let createdById = req.auth.id
-        let title = req.body.title
-        let examId = req.body.examId
-        let questionDetails = req.body.questionDetails
-        let paperType = req.body.paperType || constant.PAPER_TYPE.SAMPLE
-        let year = req.body.year
-
-        if (
-            !title ||
-            !questionDetails ||
-            !examId ||
-            (paperType && paperType == constant.PAPER_TYPE.PREVIOUS && !year)
-        ) return res.status(422)
-            .send({
-                code: 422,
-                status: constant.STATUS.FAILED,
-                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
-            })
-
-        try {
-
-            let testSeriesData = {
-                titleEn: title,
-                createdById: createdById,
-                paperType: paperType,
-                year: year,
-                createdBy: req.auth.role || constant.ROLES.ADMIN,
-            }
-
-            let newTestSeries = await academicPaperQueries.createNewTestSeries(testSeriesData, transaction)
-            newTestSeries = JSON.parse(JSON.stringify(newTestSeries))
-            await academicPaperQueries.examAcademicRelation(examId, newTestSeries.academicPaperId)
-
-            let testSeriesQuestions = await Promise.all(questionDetails.map(async (data) => {
-
-                let questionData = await questionQueries.createNewQuestions(data.question, transaction)
-                questionData = JSON.parse(JSON.stringify(questionData))
-                await academicPaperQueries.testSeriesQuestionRelation(questionData.questionId, newTestSeries.academicPaperId, data.subjectId, transaction)
-
-                if (data.question.optionType == constant.OPTION_TYPE.MULTIPLE_CHOICE) {
-                    await Promise.all(data.options.map(async ele => {
-
-                        let optionData = await optionQueries.createNewOptions(ele.text, ele.image, ele.type, ele.isCorrect, transaction)
-                        optionData = JSON.parse(JSON.stringify(optionData))
-
-                        await optionQueries.questionOptionRelation(questionData.questionId, optionData.optionId, ele.isCorrect, transaction)
-                    }))
-                } else if (data.question.optionType == constant.OPTION_TYPE.TRUE_OR_FALSE) {
-                    let isCorrect
-                    let getTFQIds = await optionQueries.getTFQIds()
-
-                    await Promise.all(getTFQIds.map(async ele => {
-                        if (ele.textEn == data.tfqAnswer.toString()) isCorrect = 1
-                        else isCorrect = 0
-
-                        await optionQueries.questionOptionRelation(questionData.questionId, ele.optionId, isCorrect, transaction)
-
-                    }))
-                }
-
-
-            }))
-            await transaction.commit()
-            return res.status(200)
-                .send({
-                    code: 200,
-                    status: constant.STATUS.SUCCESS,
-                    msg: constant.SUCCESS_MESSAGES.SAVE_DATA,
-                })
-
-        } catch (error) {
-            await transaction.rollback()
-            return res.status(422)
-                .send({
-                    code: 422,
-                    status: constant.STATUS.FAILED,
-                    msg: error.message
-                })
-        }
-    },
-
     async academicPaperByEducatorId(req, res) {
         let educatorId = req.auth.id
         let language = req.query.language || constant.LANGUAGE.ENGLISH
@@ -370,6 +219,143 @@ module.exports = {
                 })
 
         } catch (error) {
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async saveEducatorKyc(req, res) {
+        const transaction = await dbConfig.transaction()
+        let educatorId = req.auth.id
+        let avatar = req.body.avatar
+        let dob = req.body.dob
+        let gender = req.body.gender
+        let number = req.body.number
+        let qualification = req.body.qualification
+        let degree = req.body.degree
+        let specialization = req.body.specialization
+        let msg
+        let educatorKycData
+
+        if (
+            !dob ||
+            !gender ||
+            !qualification ||
+            !degree
+        ) return res.status(422)
+            .send({
+                code: 422,
+                status: constant.STATUS.FAILED,
+                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
+            })
+
+        try {
+
+            let kycData = {
+                educatorId,
+                avatar,
+                dob,
+                gender,
+                number,
+                qualification,
+                degree,
+                specialization
+            }
+
+            let educatorKycExists = await educatorQueries.getEducatorKyc(educatorId)
+            educatorKycExists = JSON.parse(JSON.stringify(educatorKycExists))
+
+            if (educatorKycExists) {
+                let updateEducatorKyc = await educatorQueries.updateEducatorKyc(kycData, educatorId)
+                msg = constant.SUCCESS_MESSAGES.PROFILE_UPDATED
+            } else {
+                let createEducatorKyc = await educatorQueries.createEducatorKyc(kycData, transaction)
+                educatorKycData = createEducatorKyc
+                msg = constant.SUCCESS_MESSAGES.NEW_PROFILE
+
+            }
+
+            await transaction.commit()
+            return res.status(200)
+                .send({
+                    code: 200,
+                    status: constant.STATUS.SUCCESS,
+                    data: educatorKycData,
+                    msg: msg
+                })
+
+        } catch (error) {
+            await transaction.rollback()
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async getMyProfile(req, res) {
+        let educatorId = req.auth.id
+
+        try {
+
+            let [
+                educatorDetails,
+                educatorKycDetails
+            ] = await Promise.all([
+                educatorQueries.educatorById(educatorId),
+                educatorQueries.getEducatorKyc(educatorId)
+            ])
+
+            educatorDetails = JSON.parse(JSON.stringify(educatorDetails))
+            educatorKycDetails = JSON.parse(JSON.stringify(educatorKycDetails))
+
+            let educatorProfile = { ...educatorDetails, ...educatorKycDetails }
+
+            return res.status(200)
+                .send({
+                    code: 200,
+                    status: constant.STATUS.SUCCESS,
+                    data: educatorProfile
+                })
+
+        } catch (error) {
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async getAllEducator(req, res) {
+        try {
+
+            let educators = await educatorQueries.allEducator()
+            let educatorData = await Promise.all(educators.map(async data => {
+                data = JSON.parse(JSON.stringify(data))
+
+                let educatorKyc = await educatorQueries.getEducatorKyc(data.educatorId)
+                educatorKyc = JSON.parse(JSON.stringify(educatorKyc))
+
+                return { ...data, ...educatorKyc }
+
+            }))
+            return res.status(200)
+                .send({
+                    code: 200,
+                    status: constant.STATUS.SUCCESS,
+                    data: educatorData
+                })
+
+        } catch (error) {
+            console.log(error)
             return res.status(422)
                 .send({
                     code: 422,

@@ -1,15 +1,20 @@
 const {
-    studentQueries
+    studentQueries,
+    optionQueries
 } = require('../../models/queries')
+const {
+    dbConfig
+} = require('../../models/index');
 const bcrypt = require('bcrypt');
 const { generateAccessToken } = require('../../utils/jwt')
 const constant = require('../../helper/constant')
 const mail = require('../../utils/mail')
-
+const moment = require('moment')
 
 module.exports = {
 
     async signUp(req, res) {
+        const transaction = await dbConfig.transaction()
         let fName = req.body.fName
         let email = req.body.email
         let password = req.body.password
@@ -35,12 +40,20 @@ module.exports = {
 
         try {
 
-            email = await mail.isEmailValid(email)
-            if (!email) return res.status(422)
+            let checkEmail = await mail.isEmailValid(email)
+            if (!checkEmail) return res.status(422)
                 .send({
                     code: 422,
                     status: constant.STATUS.FAILED,
                     msg: constant.ERROR_MESSAGES.INVALID_EMAIL
+                })
+
+            let studentExists = await studentQueries.getStudentByEmail(email)
+            if (studentExists) return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: constant.ERROR_MESSAGES.DUBLICATE_USER
                 })
 
             let data = {
@@ -50,8 +63,8 @@ module.exports = {
                 password: bcrypt.hashSync(password, 10),
             }
 
-            let newStudent = await studentQueries.newStudent(data)
-
+            let newStudent = await studentQueries.newStudent(data, transaction)
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 201,
@@ -59,7 +72,9 @@ module.exports = {
                     data: newStudent,
                     msg: constant.SUCCESS_MESSAGES.NEW_PROFILE
                 })
+
         } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
@@ -70,6 +85,7 @@ module.exports = {
     },
 
     async logIn(req, res) {
+        const transaction = await dbConfig.transaction()
         let email = req.body.email
         let password = req.body.password
 
@@ -103,8 +119,8 @@ module.exports = {
                 })
 
             let accessToken = await generateAccessToken(studentExists.studentId, constant.ROLES.STUDENT);
-            let lastLogin = await studentQueries.saveStudent({ lastLogin: new Date() }, studentExists.studentId);
-
+            let lastLogin = await studentQueries.saveStudent({ lastLogin: new Date() }, studentExists.studentId, transaction);
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 200,
@@ -114,6 +130,7 @@ module.exports = {
                 })
 
         } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
@@ -124,6 +141,7 @@ module.exports = {
     },
 
     async saveStudentKyc(req, res) {
+        const transaction = await dbConfig.transaction()
         let studentId = req.auth.id
         let avatar = req.body.avatar
         let dob = req.body.dob
@@ -133,8 +151,6 @@ module.exports = {
         let degree = req.body.degree
         let secondaryMarks = req.body.secondaryMarks
         let higherSecondaryMarks = req.body.higherSecondaryMarks
-        let studentKycData
-        let msg
 
         if (
             !dob ||
@@ -152,6 +168,19 @@ module.exports = {
 
         try {
 
+            let studentKycExists = await studentQueries.getStudentKyc(studentId)
+            studentKycExists = JSON.parse(JSON.stringify(studentKycExists))
+
+            if (studentKycExists) {
+                let updateStudentKyc = await studentQueries.updateStudentKyc(kycData, studentId, transaction)
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        msg: constant.SUCCESS_MESSAGES.PROFILE_UPDATED
+                    })
+            }
+
             let kycData = {
                 studentId,
                 avatar,
@@ -164,27 +193,18 @@ module.exports = {
                 higherSecondaryMarks
             }
 
-            let studentKycExists = await studentQueries.getStudentKyc(studentId)
-            studentKycExists = JSON.parse(JSON.stringify(studentKycExists))
-
-            if (studentKycExists) {
-                let updateStudentKyc = await studentQueries.updateStudentKyc(kycData, studentId)
-                msg = constant.SUCCESS_MESSAGES.PROFILE_UPDATED
-            } else {
-                let createStudentKyc = await studentQueries.createStudentKyc(kycData)
-                studentKycData = createStudentKyc
-                msg = constant.SUCCESS_MESSAGES.NEW_PROFILE
-            }
-
+            let studentKyc = await studentQueries.createStudentKyc(kycData, transaction)
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 200,
                     status: constant.STATUS.SUCCESS,
-                    data: studentKycData,
-                    msg: msg
+                    data: studentKyc,
+                    msg: constant.SUCCESS_MESSAGES.NEW_PROFILE
                 })
 
         } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
@@ -199,7 +219,6 @@ module.exports = {
 
         try {
 
-            let studentProfile = []
             let [
                 studentDetails,
                 studentKycDetails
@@ -208,8 +227,10 @@ module.exports = {
                 studentQueries.getStudentKyc(studentId)
             ])
 
-            studentProfile.push(studentDetails)
-            studentProfile.push(studentKycDetails)
+            studentDetails = JSON.parse(JSON.stringify(studentDetails))
+            studentKycDetails = JSON.parse(JSON.stringify(studentKycDetails))
+
+            let studentProfile = { ...studentDetails, ...studentKycDetails }
 
             return res.status(200)
                 .send({
@@ -217,7 +238,6 @@ module.exports = {
                     status: constant.STATUS.SUCCESS,
                     data: studentProfile
                 })
-
 
         } catch (error) {
             return res.status(422)
@@ -283,6 +303,7 @@ module.exports = {
     },
 
     async saveStudentAssessmentRecord(req, res) {
+        const transaction = await dbConfig.transaction()
         let studentId = req.auth.id
         let courseId = req.body.courseId
         let academicPaperId = req.body.academicPaperId
@@ -290,13 +311,12 @@ module.exports = {
         let chapterId = req.body.chapterId
         let questionId = req.body.questionId
         let selectedAnswerId = req.body.selectedAnswerId
-        let answerMarkedAs = req.body.answerMarkedAs
+        let answerMarkedAs
 
         if (
             !courseId ||
             !questionId ||
-            !selectedAnswerId ||
-            !answerMarkedAs
+            !selectedAnswerId
         ) return res.status(422)
             .send({
                 code: 422,
@@ -306,7 +326,20 @@ module.exports = {
 
         try {
 
-            let data = {
+            let isOption = await optionQueries.isOption(selectedAnswerId, questionId)
+            if (!isOption) return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: constant.ERROR_MESSAGES.INVALID_OPTION
+                })
+
+            let verifyOption = await optionQueries.verifyAnswerByOptionId(selectedAnswerId)
+            if (verifyOption) answerMarkedAs = constant.ANSWERSTATUS.CORRECT
+            else answerMarkedAs = constant.ANSWERSTATUS.WRONG
+
+
+            let assessmentRecordData = {
                 studentId,
                 courseId,
                 academicPaperId,
@@ -317,7 +350,8 @@ module.exports = {
                 answerMarkedAs
             }
 
-            let assessmentRecord = await studentQueries.saveStudentAssessmentRecord(data)
+            let assessmentRecord = await studentQueries.saveStudentAssessmentRecord(assessmentRecordData, transaction)
+            await transaction.commit()
             return res.status(200)
                 .send({
                     code: 200,
@@ -327,6 +361,120 @@ module.exports = {
                 })
 
         } catch (error) {
+            await transaction.rollback()
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async saveStudentEnrollment(req, res) {
+        const transaction = await dbConfig.transaction()
+        let studentId = req.auth.id
+        let academicPaperId = req.body.academicPaperId
+        let enrollmentType = req.body.enrollmentType
+        let paid = req.body.paid
+        let studentEnrollment
+
+        if (
+            !academicPaperId ||
+            !enrollmentType
+        ) return res.status(422)
+            .send({
+                code: 422,
+                status: constant.STATUS.FAILED,
+                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
+            })
+
+        try {
+
+            let currentDate = moment().format('YYYY-MM-DD hh:mm:ss')
+
+            let studentEnrollmentInfo = await studentQueries.enrollmentInfoByStudentId(studentId)
+            studentEnrollmentInfo = JSON.parse(JSON.stringify(studentEnrollmentInfo))
+
+            /** for trial test */
+            if (enrollmentType == constant.ENROLLMENT_TYPE.TRIAL) {
+                if (
+                    studentEnrollmentInfo &&
+                    studentEnrollmentInfo.isOption == true
+                ) return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.FAILED,
+                        msg: constant.ERROR_MESSAGES.DUBLICATE_TRIAL
+                    })
+
+
+                let trialData = {
+                    studentId: studentId,
+                    academicPaperId: academicPaperId,
+                    type: constant.ENROLLMENT_TYPE.FREE,
+                    isTrial: true,
+                    expiryDate: moment(currentDate).add(7, 'days').format('YYYY-MM-DD hh:mm:ss'),
+                }
+
+                studentEnrollment = await studentQueries.saveEnrollmentData(trialData, transaction)
+
+                /** for purchase test */
+            } else if (enrollmentType == constant.ENROLLMENT_TYPE.PURCHASED) {
+                if (
+                    studentEnrollmentInfo &&
+                    studentEnrollmentInfo.academicPaperId == academicPaperId &&
+                    studentEnrollmentInfo.type == constant.ENROLLMENT_TYPE.PURCHASED
+                ) return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.FAILED,
+                        msg: constant.ERROR_MESSAGES.DUBLICATE_TEST
+                    })
+
+                let purchasedData = {
+                    studentId: studentId,
+                    academicPaperId: academicPaperId,
+                    type: constant.ENROLLMENT_TYPE.PURCHASED,
+                    paid: paid
+                }
+
+                studentEnrollment = await studentQueries.saveEnrollmentData(purchasedData, transaction)
+
+                /** for free test */
+            } else if (enrollmentType == constant.ENROLLMENT_TYPE.FREE) {
+                if (
+                    studentEnrollmentInfo &&
+                    studentEnrollmentInfo.academicPaperId == academicPaperId &&
+                    studentEnrollmentInfo.type == constant.ENROLLMENT_TYPE.FREE
+                ) return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.FAILED,
+                        msg: constant.ERROR_MESSAGES.DUBLICATE_TEST
+                    })
+
+                let freeData = {
+                    studentId: studentId,
+                    academicPaperId: academicPaperId,
+                    type: constant.ENROLLMENT_TYPE.FREE,
+                }
+
+                studentEnrollment = await studentQueries.saveEnrollmentData(freeData, transaction)
+
+            }
+
+            await transaction.commit()
+            return res.status(200)
+                .send({
+                    code: 200,
+                    status: constant.STATUS.SUCCESS,
+                    msg: constant.SUCCESS_MESSAGES.SAVE_DATA,
+                    data: studentEnrollment
+                })
+
+        } catch (error) {
+            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,

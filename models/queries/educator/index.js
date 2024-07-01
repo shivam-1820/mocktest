@@ -1,14 +1,14 @@
 const {
     educatorModel,
-    educatorTestSeriesModel,
-    educatorTestSeriesQuestionAssociationModel
+    educatorKycModel
 } = require('../..')
-
 
 module.exports = {
 
-    async newEducator(data) {
-        return await educatorModel.create(data)
+    async newEducator(data, transaction) {
+        return await educatorModel.create(data, {
+            transaction
+        })
     },
 
     async educatorExists(email) {
@@ -20,12 +20,14 @@ module.exports = {
         })
     },
 
-    async saveEducatorDetails(data, educatorId) {
+    async saveEducatorDetails(data, educatorId, transaction) {
         return await educatorModel.update(data, {
             where: {
                 educatorId: educatorId,
                 isActive: true
             }
+        }, {
+            transaction
         })
     },
 
@@ -51,19 +53,35 @@ module.exports = {
         )
     },
 
-    async createNewTestSeries(data, transaction) {
-        return await educatorTestSeriesModel.create(
-            data, transaction
-        )
+    async getEducatorKyc(educatorId) {
+        return await educatorKycModel.findOne({
+            where: {
+                educatorId: educatorId
+            }
+        })
     },
 
-    async testSeriesQuestionRelation(questionId, testSeriesId, subjectId, transaction) {
-        return await educatorTestSeriesQuestionAssociationModel.create({
-            questionId: questionId,
-            testSeriesId: testSeriesId,
-            subjectId: subjectId
-        },
+    async updateEducatorKyc(data, educatorId) {
+        return await educatorKycModel.update(data, {
+            where: {
+                educatorId: educatorId
+            }
+        })
+    },
+
+    async createEducatorKyc(data, transaction) {
+        return await educatorKycModel.create(data, {
             transaction
-        )
+        })
+    },
+
+    async allEducator() {
+        return await educatorModel.findAll({
+            attributes: ['educatorId', 'fName', 'lName', 'email'],
+            where: {
+                isActive: true,
+                isAdmin: false
+            }
+        })
     }
 }
