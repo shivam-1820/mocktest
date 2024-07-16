@@ -18,6 +18,10 @@ module.exports = (dbConfig, Sequelize) => {
                 type: Sequelize.UUID,
                 allowNull: true,
             },
+            examId: {
+                type: Sequelize.UUID,
+                allowNull: true,
+            },
             type: {
                 type: DataTypes.ENUM(
                     constants.ENROLLMENT_TYPE.FREE,

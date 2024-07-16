@@ -9,6 +9,14 @@ ROUTE.post(
     studentController.signUp
 )
 ROUTE.post(
+    '/verify-otp',
+    studentController.verifyOtp
+)
+ROUTE.post(
+    '/resend-otp',
+    studentController.resendOtp
+)
+ROUTE.post(
     '/log-in',
     studentController.logIn
 )
@@ -23,9 +31,9 @@ ROUTE.post(
     studentController.saveStudentAssessmentRecord
 )
 ROUTE.post(
-    '/save-enrollment',
+    '/trial',
     authorize(constant.ROLES.STUDENT),
-    studentController.saveStudentEnrollment
+    studentController.studentTrial
 )
 
 ROUTE.get(
@@ -34,11 +42,11 @@ ROUTE.get(
     studentController.getMyProfile
 )
 
-ROUTE.put(
-    '/update-password',
-    authorize(constant.ROLES.STUDENT),
-    studentController.updateNewPassword
-)
+// ROUTE.put(
+//     '/update-password',
+//     authorize(constant.ROLES.STUDENT),
+//     studentController.updateNewPassword
+// )
 
 
 

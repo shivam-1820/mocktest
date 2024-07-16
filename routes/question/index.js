@@ -5,13 +5,13 @@ const constant = require('../../helper/constant')
 const questionController = require('../../controllers/question/index')
 
 ROUTE.get(
-    '/academic-exam-questions', 
-    authorize(constant.ROLES.STUDENT), 
+    '/academic-exam-questions',
+    authorize([constant.ROLES.STUDENT, constant.ROLES.EDUCATOR]),
     questionController.getQuestionsByAcademicId
 )
 ROUTE.get(
-    '/chapter-questions', 
-    authorize(constant.ROLES.STUDENT), 
+    '/chapter-questions',
+    authorize(constant.ROLES.STUDENT),
     questionController.getQuestionsByChapterId
 )
 

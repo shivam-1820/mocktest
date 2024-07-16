@@ -11,7 +11,7 @@ const constant = require('../../../helper/constant')
 module.exports = {
 
     async getAllPaperByPaperType(language, paperType) {
-        let attributes = ['academicPaperId', 'year', 'createdBy', 'createdById', 'createdAt']
+        let attributes = ['academicPaperId', 'year', 'createdBy', 'createdById', 'createdAt', 'isFree', 'price', 'duration']
         if (language == constant.LANGUAGE.ENGLISH) attributes.push(['titleEn', 'title'], ['descriptionEn', 'description'])
         else attributes.push(['titleHi', 'title'], ['descriptionHi', 'description'])
         return await academicPaperModel.findAll({
@@ -19,7 +19,7 @@ module.exports = {
             where: {
                 paperType: paperType,
                 paperStatus: true,
-                createdBy: constant.ROLES.ADMIN
+                createdBy: 'admin'
             }
         })
     },
@@ -52,8 +52,8 @@ module.exports = {
         })
     },
 
-    async getTestSeriesById(Id, language) {
-        let attributes = ['academicPaperId', 'year', 'paperType', 'createdAt', 'isFree', 'price']
+    async getTestSeriesByUserId(Id, language) {
+        let attributes = ['academicPaperId', 'year', 'createdBy', 'createdById', 'createdAt', 'isFree', 'price', 'duration']
         if (language == constant.LANGUAGE.ENGLISH) attributes.push(['titleEn', 'title'], ['descriptionEn', 'description'])
         else attributes.push(['titleHi', 'title'], ['descriptionHi', 'description'])
         return await academicPaperModel.findAll({
@@ -67,7 +67,7 @@ module.exports = {
 
     async getAcademicPaperByExamId(examId, language, paperType) {
 
-        let accademicPaperAttributes = ['academicPaperId', 'year', 'createdBy', 'createdById', 'createdAt']
+        let accademicPaperAttributes = ['academicPaperId', 'year', 'createdBy', 'createdById', 'createdAt', 'isFree', 'price', 'duration']
         if (language == constant.LANGUAGE.ENGLISH) accademicPaperAttributes.push(['titleEn', 'title'], ['descriptionEn', 'description'])
         else accademicPaperAttributes.push(['titleHi', 'title'], ['descriptionHi', 'description'])
 
@@ -87,9 +87,19 @@ module.exports = {
                     },
                     paperType: paperType,
                     paperStatus: true,
-                    createdBy: constant.ROLES.ADMIN
+                    createdBy: 'admin'
                 }
             })
+        })
+    },
+
+    async getExamIdByAcademicPaperId(academicPaperId) {
+        return await examAcademicPaperAssociationModel.findOne({
+            attributes: ['examId'],
+            where: {
+                academicPaperId: academicPaperId,
+                associationStatus: true
+            }
         })
     }
 

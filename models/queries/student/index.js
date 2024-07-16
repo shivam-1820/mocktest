@@ -18,11 +18,8 @@ module.exports = {
 
     },
 
-    async newStudent(data, transaction) {
-        return await studentModel.create(data,
-            {
-                transaction
-            })
+    async newStudent(data) {
+        return await studentModel.create(data)
     },
 
     async saveStudent(data, studentId, transaction) {
@@ -88,11 +85,12 @@ module.exports = {
         })
     },
 
-    async enrollmentInfoByStudentId(studentId) {
+    async trialInfoByStudentId(studentId) {
         return await studentEnrollmentModel.findOne({
             where: {
                 studentId: studentId,
-                status: true
+                status: true,
+                isTrial: true
             }
         })
     },

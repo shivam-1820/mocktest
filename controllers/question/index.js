@@ -20,24 +20,42 @@ module.exports = {
 
         try {
 
-            let getAllQuestionIds = await questionQueries.getAcademicQuestion(academicPaperId, language)
-            getAllQuestionIds = JSON.parse(JSON.stringify(getAllQuestionIds))
+            let getAcademicSubjectidIds = await questionQueries.getSubjectsByTestId(academicPaperId)
+            getAcademicSubjectidIds = JSON.parse(JSON.stringify(getAcademicSubjectidIds))
 
-            let questionData = await Promise.all(getAllQuestionIds.map(async (data) => {
+            /**question details by subject */
+            let questionDetailsBySubject = await Promise.all(getAcademicSubjectidIds.map(async (subject) => {
+
                 let [
-                    getQuestionDetails,
-                    getOptionDetails,
-                    getSubjectDetails
+                    getSubjectDetails,
+                    getQuestionIds
                 ] = await Promise.all([
-                    questionQueries.getQuestionDetailById(data.questionId, language),
-                    optionQueries.getOptionDetailById(data.questionId, language),
-                    subjectQueries.getSubjectDetailById(data.subjectId, language)
+                    subjectQueries.getSubjectDetailById(subject.subjectId, language),
+                    questionQueries.getAcademicQuestionBySubId(academicPaperId, subject.subjectId)
                 ])
 
+                getSubjectDetails = JSON.parse(JSON.stringify(getSubjectDetails))
+                getQuestionIds = JSON.parse(JSON.stringify(getQuestionIds))
+
+                let questionDetails = await Promise.all(getQuestionIds.map(async (question) => {
+
+                    let [
+                        getQuestionDetails,
+                        getOptionDetails,
+                    ] = await Promise.all([
+                        questionQueries.getQuestionDetailById(question.questionId, language),
+                        optionQueries.getOptionDetailById(question.questionId, language),
+                    ])
+
+                    return {
+                        question: getQuestionDetails,
+                        options: getOptionDetails
+                    }
+                }))
+
                 return {
-                    question: getQuestionDetails,
-                    subject: getSubjectDetails,
-                    options: getOptionDetails
+                    subject: getSubjectDetails.name,
+                    questionDetails: questionDetails
                 }
 
             }))
@@ -46,10 +64,11 @@ module.exports = {
                 .send({
                     code: 200,
                     status: constant.STATUS.SUCCESS,
-                    data: questionData
+                    data: questionDetailsBySubject
                 })
 
         } catch (error) {
+            console.log(error)
             return res.status(422)
                 .send({
                     code: 422,

@@ -18,6 +18,28 @@ module.exports = {
         })
     },
 
+    async getAcademicQuestionBySubId(academicPaperId, subjectId) {
+        return await questionAcademicPaperAssociationModel.findAll({
+            attributes: ['questionId', 'subjectId'],
+            where: {
+                academicPaperId: academicPaperId,
+                associationStatus: true,
+                subjectId: subjectId
+            }
+        })
+    },
+
+    async getSubjectsByTestId(academicPaperId) {
+        return await questionAcademicPaperAssociationModel.findAll({
+            attributes: ['subjectId'],
+            where: {
+                academicPaperId: academicPaperId,
+                associationStatus: true
+            },
+            group: ['subjectId']
+        })
+    },
+
     async getChapterQuestion(chapterId) {
         return await chapterQuestionAssociationModel.findAll({
             attributes: ['questionId'],

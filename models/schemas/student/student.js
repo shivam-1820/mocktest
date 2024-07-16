@@ -11,11 +11,7 @@ module.exports = (dbConfig, Sequelize) => {
                 primaryKey: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            fName: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            lName: {
+            name: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
@@ -25,24 +21,31 @@ module.exports = (dbConfig, Sequelize) => {
                 unique: {
                     args: true,
                     msg: constants.ERROR_MESSAGES.DUBLICATE_EMAIL,
-                },
-
+                }
             },
-            otp: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
-            password: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            isActive: {
+            isVerifed: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: true,
             },
             lastLogin: {
                 type: DataTypes.DATE,
                 defaultValue: DataTypes.NOW
+            },
+            mobile: {
+                type: DataTypes.STRING,
+                allowNull: true,
+                unique: {
+                    args: true,
+                    msg: constants.ERROR_MESSAGES.DUBLICATE_PHONE_NUMBER,
+                }
+            },
+            gender: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
+            dob: {
+                type: DataTypes.STRING,
+                allowNull: true
             },
         },
         {

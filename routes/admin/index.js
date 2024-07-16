@@ -4,17 +4,17 @@ const authorize = require('../../utils/auth_middleware')
 const constant = require('../../helper/constant')
 const adminController = require('../../controllers/admin/index')
 
-ROUTE.post(
-    '/sign-up',
-    adminController.signUp
-)
-ROUTE.post(
-    '/log-in',
-    adminController.logIn
-)
+// ROUTE.post(
+//     '/sign-up',
+//     adminController.signUp
+// )
+// ROUTE.post(
+//     '/log-in',
+//     adminController.logIn
+// )
 ROUTE.post(
     '/add-new-test-series',
-    authorize([constant.ROLES.EDUCATOR, constant.ROLES.ADMIN]),
+    authorize(constant.ROLES.EDUCATOR),
     adminController.addNewAcademicTest
 )
 

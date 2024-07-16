@@ -61,6 +61,13 @@ module.exports = (dbConfig, Sequelize) => {
             price: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
+            },
+            duration: {                                 // in second
+                type: DataTypes.STRING,
+                allowNull: false,
+                set(value) {
+                    const time = this.setDataValue('duration', value * 60)
+                }
             }
         },
         {

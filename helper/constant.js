@@ -1,9 +1,9 @@
 module.exports = {
 
     ROLES: {
-        STUDENT: 'student',
-        EDUCATOR: 'educator',
-        ADMIN: 'admin'
+        STUDENT: 3,
+        EDUCATOR: 6,
+        ADMIN: 0
     },
 
     LANGUAGE: {
@@ -67,6 +67,14 @@ module.exports = {
         USER_IMAGE: 'https://rgyan-flutter200503-dev.s3.ap-south-1.amazonaws.com/web/pg/mobileMenuIcons/profile.png'
     },
 
+    LEARNERHUNT_API: {
+        FIRST_STUDENT_ROUTE: 'https://bestmbacollegeinbangalore.com/api/quiz/student',
+        SECOND_STUDENT_ROUTE: 'https://bestmbacollegeinbangalore.com/api/student',
+        FIRST_EDUCATOR_ROUTE: 'https://bestmbacollegeinbangalore.com/api/quiz/tutor',
+        SECOND_EDUCATOR_ROUTE: 'https://bestmbacollegeinbangalore.com/api/tutor',
+        AUTHORIZE_USER_ROUTE: 'https://bestmbacollegeinbangalore.com/api/quiz/user-authentication'
+    },
+
     ERROR_MESSAGES: {
         DUBLICATE_EMAIL: 'Email address already in use!',
         DUBLICATE_PHONE_NUMBER: 'Mobile number already in use!',
@@ -80,8 +88,9 @@ module.exports = {
         DATABASE_NOT_CONNECTED: 'Could not connect to the database. Error:',
         INVALID_OPTION: 'Option is not related to this question',
         DUBLICATE_USER: 'User already exists',
-        DUBLICATE_TRIAL: 'You already used trail',
-        DUBLICATE_TEST: 'You already have this test'
+        DUBLICATE_TEST: 'You already have this test',
+        DUBLICATE_TRIAL: 'You already have an exam trail. To appear for the tests of this exam, you will have to purchase the tests of this exam.',
+        TRIAL_EXPIRED: 'Your trial period for the tests of this exam has ended, please purchase the tests to continue the tests.'
     },
 
     SUCCESS_MESSAGES: {
@@ -91,6 +100,8 @@ module.exports = {
         PROFILE_UPDATED: 'Profile updated successfully',
         PASSWORD_UPDATE: 'Password updated successfully',
         DATABASE_CONNECTED: 'Database connected successfully',
-        SAVE_DATA: 'Data save successfully'
+        SAVE_DATA: 'Data save successfully',
+        ALREADY_HAVE_TRIAL: 'You already have trial of tests for this exam',
+        SENT_OTP: 'Otp has been send to your email.'
     }
 }

@@ -9,6 +9,14 @@ ROUTE.post(
     educatorController.signUp
 )
 ROUTE.post(
+    '/verify-otp',
+    educatorController.verifyOtp
+)
+ROUTE.post(
+    '/resend-otp',
+    educatorController.resendOtp
+)
+ROUTE.post(
     '/log-in',
     educatorController.logIn
 )
@@ -28,16 +36,16 @@ ROUTE.get(
     authorize(constant.ROLES.EDUCATOR),
     educatorController.getMyProfile
 )
-ROUTE.get(
-    '/all-educator',
-    educatorController.getAllEducator
-)
+// ROUTE.get(
+//     '/all-educator',
+//     educatorController.getAllEducator
+// )
 
-ROUTE.put(
-    '/update-password',
-    authorize(constant.ROLES.EDUCATOR),
-    educatorController.updateNewPassword
-)
+// ROUTE.put(
+//     '/update-password',
+//     authorize(constant.ROLES.EDUCATOR),
+//     educatorController.updateNewPassword
+// )
 
 
 

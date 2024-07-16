@@ -154,7 +154,7 @@ module.exports = {
 
     async addNewAcademicTest(req, res) {
         const transaction = await dbConfig.transaction()
-        let createdById = req.auth.id
+        let createdById = req.user._id
         let title = req.body.title
         let examId = req.body.examId
         let questionDetails = req.body.questionDetails
@@ -162,6 +162,7 @@ module.exports = {
         let year = req.body.year
         let isFree = req.body.isFree
         let price = req.body.price
+        let duration = req.body.duration
 
         if (
             !title ||
@@ -183,9 +184,10 @@ module.exports = {
                 createdById: createdById,
                 paperType: paperType,
                 year: year,
-                createdBy: req.auth.role,
+                createdBy: req.userType,
                 isFree: isFree,
-                price: price
+                price: price,
+                duration: duration
             }
 
             let newTestSeries = await academicPaperQueries.createNewTestSeries(testSeriesData, transaction)

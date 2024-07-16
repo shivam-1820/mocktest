@@ -3,29 +3,25 @@ const {
     academicPaperQueries
 } = require('../../models/queries')
 const {
-    generateAccessToken
-} = require('../../utils/jwt')
-const {
     dbConfig
 } = require('../../models/index');
-const mail = require('../../utils/mail')
 const constant = require('../../helper/constant')
 const bcrypt = require('bcrypt');
+const clientApi = require('../../utils/apiService')
 
 module.exports = {
 
     async signUp(req, res) {
-        const transaction = await dbConfig.transaction()
-        let fName = req.body.fName
-        let lName = req.body.lName
         let email = req.body.email
         let password = req.body.password
+        let name = req.body.name
+        let mobile = req.body.mobile
 
         if (
-            !fName ||
-            !lName ||
+            !name ||
             !email ||
-            !password
+            !password ||
+            !mobile
         ) return res.status(422)
             .send({
                 code: 422,
@@ -41,61 +37,52 @@ module.exports = {
 
         try {
 
-            let checkEmail = await mail.isEmailValid(email)
-            if (
-                !checkEmail
-            ) return res.status(422)
-                .send({
-                    code: 422,
-                    status: constant.STATUS.FAILED,
-                    msg: constant.ERROR_MESSAGES.INVALID_EMAIL
-                })
-
-            let educatorExists = await educatorQueries.educatorExists(email)
-            if (educatorExists) return res.status(422)
-                .send({
-                    code: 422,
-                    status: constant.STATUS.FAILED,
-                    msg: constant.ERROR_MESSAGES.DUBLICATE_USER
-                })
-
-            let data = {
-                fName: fName,
-                lName: lName,
-                email: email,
-                password: bcrypt.hashSync(password, 10),
+            let bodyFormData = {
+                email,
+                password,
+                name,
+                mobile
+            }
+            let url = constant.LEARNERHUNT_API.FIRST_EDUCATOR_ROUTE + '/getOTP'
+            let headers = {
+                "Content-Type": "multipart/form-data"
             }
 
-            let newEducator = await educatorQueries.newEducator(data, transaction)
-            await transaction.commit()
-            return res.status(200)
-                .send({
-                    code: 201,
-                    status: constant.STATUS.SUCCESS,
-                    data: newEducator,
-                    msg: constant.SUCCESS_MESSAGES.NEW_PROFILE
-                })
+            let apiRes = await clientApi.apiRequest('post', url, bodyFormData, headers)
+
+            if (apiRes.status && (apiRes.status >= 200 || apiRes.status <= 300)) {
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.data
+                    })
+            } else {
+                return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.response.data
+                    })
+            }
 
         } catch (error) {
-            await transaction.rollback()
             return res.status(422)
                 .send({
                     code: 422,
                     status: constant.STATUS.FAILED,
                     msg: error.message
                 })
-
         }
     },
 
-    async logIn(req, res) {
-        const transaction = await dbConfig.transaction()
+    async verifyOtp(req, res) {
         let email = req.body.email
-        let password = req.body.password
+        let otp = req.body.otp
 
         if (
             !email ||
-            !password
+            !otp
         ) return res.status(422)
             .send({
                 code: 422,
@@ -105,40 +92,179 @@ module.exports = {
 
         try {
 
-            let educatorExists = await educatorQueries.educatorExists(email)
-            if (
-                !educatorExists
-            ) return res.status(422)
-                .send({
-                    code: 404,
-                    status: constant.STATUS.FAILED,
-                    msg: constant.ERROR_MESSAGES.NOT_USER
-                })
+            let bodyFormData = {
+                email,
+                otp
+            }
+            let url = constant.LEARNERHUNT_API.FIRST_EDUCATOR_ROUTE + '/signup'
+            let headers = {
+                "Content-Type": "multipart/form-data"
+            }
 
-            /**To verify the password which is saved in database */
-            let verifyPassword = await bcrypt.compare(password, educatorExists.password)
-            if (
-                !verifyPassword
-            ) return res.status(422)
+            let apiRes = await clientApi.apiRequest('post', url, bodyFormData, headers)
+            if (!apiRes) return res.status(500)
+                .send({
+                    code: 500,
+                    status: constant.STATUS.SUCCESS,
+                    msg: 'server error'
+                })
+            if (apiRes.status && (apiRes.status >= 200 || apiRes.status <= 300)) {
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.data
+                    })
+            } else {
+                return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.response.data
+                    })
+            }
+
+        } catch (error) {
+            return res.status(422)
                 .send({
                     code: 422,
                     status: constant.STATUS.FAILED,
-                    msg: constant.ERROR_MESSAGES.INCORRECT_PASSWORD
+                    msg: error.message
                 })
+        }
+    },
 
-            let accessToken = await generateAccessToken(educatorExists.educatorId, constant.ROLES.EDUCATOR);
-            let lastLogin = await educatorQueries.saveEducatorDetails({ lastLogin: new Date() }, educatorExists.educatorId, transaction);
-            await transaction.commit()
-            return res.status(200)
-                .send({
-                    code: 200,
-                    status: constant.STATUS.SUCCESS,
-                    token: accessToken,
-                    msg: constant.SUCCESS_MESSAGES.SUCCESSFUL_LOGIN
-                })
+    async resendOtp(req, res) {
+        let email = req.body.email
+
+        if (
+            !email
+        ) return res.status(422)
+            .send({
+                code: 422,
+                status: constant.STATUS.FAILED,
+                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
+            })
+
+        try {
+
+            let bodyFormData = {
+                email
+            }
+            let url = constant.LEARNERHUNT_API.FIRST_EDUCATOR_ROUTE + '/loginwithotp'
+            let headers = {
+                "Content-Type": "multipart/form-data"
+            }
+
+            let apiRes = await clientApi.apiRequest('post', url, bodyFormData, headers)
+
+            if (apiRes.status && (apiRes.status >= 200 || apiRes.status <= 300)) {
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.data
+                    })
+            } else {
+                return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.response.data
+                    })
+            }
 
         } catch (error) {
-            await transaction.rollback()
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async getMyProfile(req, res) {
+        let token = req.headers.authorization
+
+        try {
+            let headers = {
+                authorization: token,
+            }
+            let url = constant.LEARNERHUNT_API.SECOND_EDUCATOR_ROUTE + '/my-profile'
+
+            let apiRes = await clientApi.apiRequest('get', url, '', headers)
+
+            if (apiRes.status && (apiRes.status >= 200 || apiRes.status <= 300)) {
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        data: apiRes.data.data
+                    })
+            } else {
+                return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.response.data
+                    })
+            }
+
+        } catch (error) {
+            return res.status(422)
+                .send({
+                    code: 422,
+                    status: constant.STATUS.FAILED,
+                    msg: error.message
+                })
+        }
+    },
+
+    async logIn(req, res) {
+        let email = req.body.email
+        let password = req.body.password
+        let otp = req.body.otp
+        let bodyFormData
+
+        if (
+            !email ||
+            (!otp && !password)
+        ) return res.status(422)
+            .send({
+                code: 422,
+                status: constant.STATUS.FAILED,
+                msg: constant.ERROR_MESSAGES.REQUIRED_DATA
+            })
+
+        try {
+
+            if (otp) bodyFormData = { email, otp }
+            else bodyFormData = { email, password }
+            let url = constant.LEARNERHUNT_API.FIRST_EDUCATOR_ROUTE + '/login'
+            let headers = {
+                "Content-Type": "multipart/form-data"
+            }
+
+            let apiRes = await clientApi.apiRequest('post', url, bodyFormData, headers)
+
+            if (apiRes.status && (apiRes.status <= 200 || apiRes.status >= 300)) {
+                return res.status(200)
+                    .send({
+                        code: 200,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.data
+                    })
+            } else {
+                return res.status(422)
+                    .send({
+                        code: 422,
+                        status: constant.STATUS.SUCCESS,
+                        msg: apiRes.response.data
+                    })
+            }
+
+        } catch (error) {
             return res.status(422)
                 .send({
                     code: 422,
@@ -149,7 +275,7 @@ module.exports = {
     },
 
     async updateNewPassword(req, res) {
-        let educatorId = req.auth.id
+        let educatorId = req.user._id
         let oldPassword = req.body.oldPassword
         let newPassword = req.body.newPassword
 
@@ -206,11 +332,11 @@ module.exports = {
     },
 
     async academicPaperByEducatorId(req, res) {
-        let educatorId = req.auth.id
+        let educatorId = req.user._id
         let language = req.query.language || constant.LANGUAGE.ENGLISH
 
         try {
-            let paperList = await academicPaperQueries.getTestSeriesById(educatorId, language)
+            let paperList = await academicPaperQueries.getTestSeriesByUserId(educatorId, language)
             return res.status(200)
                 .send({
                     code: 200,
@@ -230,7 +356,7 @@ module.exports = {
 
     async saveEducatorKyc(req, res) {
         const transaction = await dbConfig.transaction()
-        let educatorId = req.auth.id
+        let educatorId = req.user._id
         let avatar = req.body.avatar
         let dob = req.body.dob
         let gender = req.body.gender
@@ -290,41 +416,6 @@ module.exports = {
 
         } catch (error) {
             await transaction.rollback()
-            return res.status(422)
-                .send({
-                    code: 422,
-                    status: constant.STATUS.FAILED,
-                    msg: error.message
-                })
-        }
-    },
-
-    async getMyProfile(req, res) {
-        let educatorId = req.auth.id
-
-        try {
-
-            let [
-                educatorDetails,
-                educatorKycDetails
-            ] = await Promise.all([
-                educatorQueries.educatorById(educatorId),
-                educatorQueries.getEducatorKyc(educatorId)
-            ])
-
-            educatorDetails = JSON.parse(JSON.stringify(educatorDetails))
-            educatorKycDetails = JSON.parse(JSON.stringify(educatorKycDetails))
-
-            let educatorProfile = { ...educatorDetails, ...educatorKycDetails }
-
-            return res.status(200)
-                .send({
-                    code: 200,
-                    status: constant.STATUS.SUCCESS,
-                    data: educatorProfile
-                })
-
-        } catch (error) {
             return res.status(422)
                 .send({
                     code: 422,
